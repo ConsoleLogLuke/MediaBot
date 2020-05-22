@@ -16,6 +16,8 @@ fun startWebApp() {
         config.addStaticFiles("uploads", Location.EXTERNAL)
     }.start(config.port)
 
+    val sizeLimit = FileUtils.byteCountToDisplaySize(config.fileSizeLimit)
+
     app.get("/new/:randomId") { ctx ->
         val randomId = ctx.pathParam("randomId")
             .toIntOrNull() ?: throw BadRequestResponse()
@@ -35,9 +37,14 @@ fun startWebApp() {
         val message = uploads[randomId] ?: throw BadRequestResponse()
 
         val uploaded = ctx.uploadedFile("upload") ?: throw BadRequestResponse()
-        if (message.author.id !in config.limitlessUsers && uploaded.size > config.fileSizeLimit) {
-            val limit = FileUtils.byteCountToDisplaySize(config.fileSizeLimit)
-            ctx.result("Your file is too large! The file size limit is $limit.")
+
+        if (uploaded.size == 0L) {
+            ctx.result("You can't upload an empty file!")
+            return@post
+        }
+
+        if (message.author.id !in config.adminIds && uploaded.size > config.fileSizeLimit) {
+            ctx.result("Your file is too large! The file size limit is $sizeLimit.")
             return@post
         }
 
@@ -50,7 +57,7 @@ fun startWebApp() {
             val size = FileUtils.byteCountToDisplaySize(uploaded.size)
 
             val embed = EmbedBuilder()
-            embed.setTitle("\uD83D\uDCBE ${uploaded.filename}")
+            embed.setTitle("\uD83D\uDCC4 ${uploaded.filename}")
             embed.setColor(Color(0x7289DA))
             embed.addField("Uploaded By", message.author.asMention, true)
             embed.addField("Size", size, true)

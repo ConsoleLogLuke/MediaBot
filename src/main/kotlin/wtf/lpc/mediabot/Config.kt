@@ -7,7 +7,7 @@ import kotlin.system.exitProcess
 data class Config(
     val botToken: String,
     val fileSizeLimit: Long,
-    val limitlessUsers: List<String>,
+    val adminIds: List<String>,
     val port: Int,
     val serverUrl: String
 )
@@ -20,7 +20,7 @@ fun loadConfig() {
         val defaultConfig = mapOf(
             "botToken" to "bot-token-here",
             "fileSizeLimit" to 5000000000,
-            "limitlessUsers" to listOf("279622919242514432", "162648671005966337"),
+            "adminIds" to listOf("279622919242514432", "162648671005966337"),
             "port" to 7000,
             "serverUrl" to "http://localhost:7000"
         )
@@ -35,9 +35,9 @@ fun loadConfig() {
     val json = JSONObject(configFile.readText())
     val botToken = json.getString("botToken")
     val fileSizeLimit = json.getLong("fileSizeLimit")
-    val limitlessUsers = json.getJSONArray("limitlessUsers").map { it.toString() }
+    val adminIds = json.getJSONArray("adminIds").map { it.toString() }
     val port = json.getInt("port")
     val serverUrl = json.getString("serverUrl")
 
-    config = Config(botToken, fileSizeLimit, limitlessUsers, port, serverUrl)
+    config = Config(botToken, fileSizeLimit, adminIds, port, serverUrl)
 }
